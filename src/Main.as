@@ -7,11 +7,13 @@
 	import flash.events.TouchEvent;
 	import flash.events.TransformGestureEvent;
 	import flash.geom.Point;
+	import flash.media.Sound;
 	import flash.system.Capabilities;
 	import flash.text.TextField;
 	import flash.ui.Keyboard;
 	import flash.ui.Multitouch;
 	import flash.ui.MultitouchInputMode;
+	import flash.utils.getDefinitionByName;
 	
 	import gs.TweenLite;
 	import gs.easing.*;
@@ -55,7 +57,7 @@
 			initBoard();
 			initCells();
 			initActiveBar();
-			//initLog();
+			initLog();
 			//initCellContainerTouchEvent();
 			initCellContainerGestureEvent();
 			//initScore();
@@ -136,17 +138,9 @@
 				textField.mouseWheelEnabled = false;
 				textField.selectable = false;
 				textField.text = Config.yunmu[j];
+				titleYunmu.name = Config.yunmu[j];
 				cellcontainer.addChild(titleYunmu);
 			}
-			//初始化cell左边声母列表
-			var titleCorner:Sprite = new Shenmu();
-			titleCorner.x = 0;
-			titleCorner.y = 0;
-			textField = titleCorner.getChildByName("txt") as TextField;
-			textField.mouseWheelEnabled = false;
-			textField.selectable = false;
-			textField.text = "";
-			cellcontainer.addChild(titleCorner);
 			
 			for (i = 0; i < Config.shenmu.length; i++) {
 				//声母，列
@@ -157,6 +151,7 @@
 				textField.mouseWheelEnabled = false;
 				textField.selectable = false;
 				textField.text = Config.shenmu[i];
+				titleShenmu.name = Config.shenmu[i];
 				cellcontainer.addChild(titleShenmu);
 			}
 			//初始化cell内容
@@ -165,7 +160,6 @@
 					var cell:Cell = new Cell(cellcontainer, Config.shenmu[i], Config.yunmu[j]);
 					cell.x = j * cellWidth;
 					cell.y = i * cellHeight;
-					cell.name = Config.shenmu[i] + Config.yunmu[j];
 					cellcontainer.addChild(cell);
 				}
 			}
@@ -254,32 +248,38 @@
 				movingControl.pan(event.offsetX, event.offsetY);
 			}
 			if(event.phase == GesturePhase.BEGIN) {
-				trace("BEGIN: " + event.offsetX);
+				//trace("BEGIN: " + event.offsetX);
 			}
 			if(event.phase == GesturePhase.END) {
-				trace("END: " + event.offsetX);
-				trace("点击: " + getKeyByPosition(new Point(event.localX, event.localY)));
-			}
-		}
-		private function getKeyByPosition(pos:Point):Cell{
-			//根据位置查找到拼音名字
-			trace(pos);
-			var i:int;
-			var j:int;
-			var cell:Cell;
-			var re:Cell;
-			for (i = 1; i < Config.shenmu.length; i++) {
-				for (j = 1; j < Config.yunmu.length; j++) {
-					cell = cellcontainer.getChildByName(Config.shenmu[i] + Config.yunmu[j]) as Cell;
-					if(cell){
-						if(pos.x>cell.x && pos.x<cell.x+cell.width && pos.y>cell.y && pos.y<cell.y+cell.height) {
-							re = cell;
-							break;
-						}
+				//trace("END: " + event.offsetX);
+				var cell:Cell = getCellNameByPosition(new Point(event.localX, event.localY));
+				if(cell) {
+					log.message(cell.name);
+					var mp3Array:Array = cell.getMP3File(cell.name);
+					if(mp3Array){
+						log.message("播音库：" + mp3Array[0] + ".mp3");
+						playMp3(mp3Array[0] + ".mp3");
 					}
 				}
 			}
-			return re;
+		}
+		private function playMp3(linkName:String):void{
+			var aClass:Class = getDefinitionByName(linkName) as Class;
+			var sound:Sound = new aClass() as Sound;
+			sound.play(0);
+		}
+		private function getCellNameByPosition(pos:Point):Cell{
+			//根据位置查找到拼音名字
+			//trace(pos);
+			var _y:int = pos.y / 74 + 1;
+			var _x:int = pos.x / 84 + 1;
+			var cellName:String;
+			var cell:src.Cell = null;
+			if(_y > 0 && _x > 0){
+				cellName = Config.shenmu[_y] + Config.yunmu[_x];
+				cell = cellcontainer.getChildByName(cellName) as Cell;
+			}
+			return cell;
 		}
 	}
 }

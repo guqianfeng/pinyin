@@ -4,6 +4,7 @@ package src{
 	import flash.events.IOErrorEvent;
 	import flash.events.MouseEvent;
 	import flash.events.ProgressEvent;
+	import flash.geom.Point;
 	import flash.media.Sound;
 	import flash.media.SoundTransform;
 	import flash.net.URLRequest;
@@ -42,6 +43,7 @@ package src{
 			if (ifExist(py)) {
 				textField.text = py;
 				this.name = py;
+				
 				/*
 				this.addEventListener(MouseEvent.CLICK, onCellClickHandler);
 				this.addEventListener(MouseEvent.MOUSE_DOWN, onCellMouseDownHandler);
@@ -69,8 +71,10 @@ package src{
 				//tone3 = buttonsGroup.getChildByName("tone3") as SimpleButton;
 				//tone4 = buttonsGroup.getChildByName("tone4") as SimpleButton;
 				//close = buttonsGroup.getChildByName("close") as SimpleButton;
+			}else {
+				textField.text = "";
+				this.name = "";
 			}
-			else textField.text = "";
 		}
 		public function setScore():void {
 			//读取分数并打星星
@@ -120,7 +124,8 @@ package src{
 		}
 		private function onCellClickHandler(event:MouseEvent):void {
 			//播放声音
-			trace("onCellClick");
+			trace("onCellClick: " + new Point(event.localX, event.localY) + ", cellPos: " + 
+				new Point(event.currentTarget.x, event.currentTarget.y));
 		}
 		private function onCellMouseDownHandler(event:MouseEvent):void{
 			//侦听是否长按
@@ -130,7 +135,7 @@ package src{
 			//侦听是否双击
 			
 		}
-		private function getMP3File(pinyin:String):Array {
+		public function getMP3File(pinyin:String):Array {
 			var re:Array = new Array();
 			for (var i = 0; i < Config.mp3List.length; i++) {
 				var str:String = Config.mp3List[i] as String;
@@ -140,7 +145,7 @@ package src{
 			}
 			return re;
 		}
-		private function playMusic(filename:String):void {
+		public function playMusic(filename:String):void {
 			var s:Sound = new Sound();
 			s.addEventListener(Event.COMPLETE, onSoundLoadFinished);
 			s.addEventListener(ProgressEvent.PROGRESS, onSoundLoadingHandler);
